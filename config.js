@@ -15,6 +15,28 @@ const OPENROUTER_MODELS = {
     llama: 'meta-llama/llama-3.2-11b-vision-instruct:free',
 };
 
+const VARIABLE_DESCRIPTIONS = {
+    P: 'Capital inicial o Presente',
+    S: 'Monto final o Futuro',
+    I: 'Interés total generado',
+    j: 'Tasa de interés nominal (anual, a menos que se especifique lo contrario)',
+    i: 'Tasa de interés efectiva por período',
+    n: 'Número de períodos (años, meses, días)',
+    t: 'Tiempo en años',
+    m: 'Frecuencia de capitalización por año (ej: 12 para mensual)',
+    k: 'Número de períodos de diferimiento',
+    R: 'Monto de la renta o cuota periódica',
+    G: 'Gradiente aritmético',
+    g: 'Gradiente geométrico (tasa de crecimiento)',
+    d: 'Tasa de descuento simple o bancaria',
+    de: 'Tasa de descuento efectiva',
+    DB: 'Monto del descuento bancario',
+    pi: 'Tasa de inflación',
+    N: 'Número de la cuota específica a analizar en un préstamo',
+    A1: 'Monto de la primera amortización en un préstamo',
+    DE_N: 'Derecho de extinguir una deuda después del pago N',
+};
+
 const FORMULA_LATEX_TEMPLATES = {
     'formula_util_dias_entre_fechas': 'n_{dias} = \text{DiasEntre}(fecha_{final}, fecha_{inicial})',
     'formula_util_fraccion_anio': 'n = \frac{n_{dias}}{360}',
@@ -91,4 +113,4 @@ const FORMULA_LATEX_TEMPLATES = {
     'formula_util_division': 'Resultado = \frac{valor1}{valor2}',
 };
 
-module.exports = { API_KEYS, OPENROUTER_MODELS, FORMULA_LATEX_TEMPLATES };
+module.exports = { API_KEYS, OPENROUTER_MODELS, FORMULA_LATEX_TEMPLATES, VARIABLE_DESCRIPTIONS };

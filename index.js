@@ -47,8 +47,29 @@ app.post('/whatsapp', async (req, res) => {
 
 // --- Lógica Principal del Bot ---
 async function handleMessage(messageBody, from) {
-    const messageText = messageBody.trim();
+    const messageText = messageBody.trim().toLowerCase(); // Convertimos a minúsculas para que !menu, !Menu, etc. funcionen
     let usedCommand = null;
+
+    // =================================================================
+    // 1. AÑADIMOS LA LÓGICA PARA EL COMANDO !menu
+    // =================================================================
+    if (messageText === '!menu' || messageText === '/menu' || messageText === '#menu') {
+        const welcomeMessage = `👋 ¡Hola! Soy tu asistente de Matemática Financiera.
+
+Puedes usar los siguientes comandos para resolver problemas:
+* *!resolver1* (Recomendado ✨)
+* *!resolver2*
+* *!resolver3*
+* *!resolver4*
+* *!resolver5*
+
+Simplemente escribe el comando seguido de tu problema.
+*Ejemplo:* \`!resolver1 ¿Cuál es el interés simple de S/1000 al 5% anual por 2 años?\``;
+        
+        await sendMessage(welcomeMessage, from);
+        return; // Detenemos la ejecución para que no busque otros comandos
+    }
+    // =================================================================
 
     for (const command in commandMap) {
         if (messageText.startsWith(command)) {
@@ -58,11 +79,12 @@ async function handleMessage(messageBody, from) {
     }
 
     if (!usedCommand) {
-        return; // Ignora si no es un comando válido
+        // Si no es !menu ni un comando de resolución, no hace nada.
+        return; 
     }
 
     const provider = commandMap[usedCommand];
-    const userProblem = messageText.substring(usedCommand.length).trim();
+    const userProblem = messageBody.trim().substring(usedCommand.length).trim();
 
     if (!userProblem) {
         await sendMessage(`Por favor, escribe un problema después del comando ${usedCommand}.`, from);
