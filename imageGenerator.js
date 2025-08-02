@@ -1,3 +1,5 @@
+// imageGenerator.js - CÓDIGO COMPLETO Y CORREGIDO
+
 const { createCanvas } = require('canvas');
 const { FORMULA_LATEX_TEMPLATES } = require('./config.js');
 
@@ -97,6 +99,7 @@ function wrapText(context, text, maxWidth) {
     return result;
 }
 
+
 /**
  * Genera una imagen de bienvenida con la lista de comandos.
  * @returns {Buffer} Un buffer de la imagen en formato PNG.
@@ -138,3 +141,23 @@ function generateWelcomeImage() {
         { cmd: '!resolver3', desc: '' },
         { cmd: '!resolver4', desc: '' },
         { cmd: '!resolver5', desc: '' },
+    ];
+
+    ctx.fillText('Usa los siguientes comandos:', padding, currentY);
+    currentY += lineHeight * 1.5;
+
+    commands.forEach(command => {
+        ctx.fillText(`• ${command.cmd} ${command.desc}`, padding + 30, currentY);
+        currentY += lineHeight;
+    });
+    
+    // Ejemplo de uso
+    ctx.font = 'italic 18px Arial';
+    currentY += lineHeight * 0.5;
+    ctx.fillText('Ejemplo: !resolver1 ¿Cuál es el interés de S/1000 al 5%?', padding, currentY);
+
+    return canvas.toBuffer('image/png');
+}
+
+// ÚNICA LÍNEA DE EXPORTACIÓN AL FINAL DEL ARCHIVO
+module.exports = { generateImage, generateWelcomeImage };
