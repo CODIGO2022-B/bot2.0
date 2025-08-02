@@ -16,6 +16,7 @@
   "dependencies": {
     "twilio": "^5.2.2",
     "express": "^4.19.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "@google/generative-ai": "^0.15.0"
   }
 }
