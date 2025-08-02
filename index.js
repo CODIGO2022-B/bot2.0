@@ -3,7 +3,7 @@ const express = require('express');
 const twilio = require('twilio');
 const { generateCalculationPlan } = require('./aiService.js');
 const { executePlan } = require('./calculationEngine.js');
-const { generateImage } = require('./imageGenerator.js');
+const { generateImage, generateWelcomeImage } = require('./imageGenerator.js');
 
 // --- Configuración de Twilio y Express ---
 const app = express();
@@ -54,20 +54,16 @@ async function handleMessage(messageBody, from) {
     // 1. AÑADIMOS LA LÓGICA PARA EL COMANDO !menu
     // =================================================================
     if (messageText === '!menu' || messageText === '/menu' || messageText === '#menu') {
-        const welcomeMessage = `👋 ¡Hola! Soy tu asistente de Matemática Financiera.
-
-Puedes usar los siguientes comandos para resolver problemas:
-* *!resolver1* (Recomendado ✨)
-* *!resolver2*
-* *!resolver3*
-* *!resolver4*
-* *!resolver5*
-
-Simplemente escribe el comando seguido de tu problema.
-*Ejemplo:* \`!resolver1 ¿Cuál es el interés simple de S/1000 al 5% anual por 2 años?\``;
-        
-        await sendMessage(welcomeMessage, from);
-        return; // Detenemos la ejecución para que no busque otros comandos
+        console.log('[+] Generando imagen de bienvenida...');
+        try {
+            const welcomeImageBuffer = generateWelcomeImage();
+            await sendMedia(welcomeImageBuffer, from);
+            console.log('[+] Imagen de bienvenida enviada.');
+        } catch (error) {
+            console.error('Error al generar o enviar la imagen de bienvenida:', error);
+            await sendMessage('Lo siento, no pude generar el menú de bienvenida en este momento.', from);
+        }
+        return; // Detenemos la ejecución
     }
     // =================================================================
 
@@ -139,7 +135,7 @@ async function sendMedia(imageBuffer, to) {
 }
 
 // --- Inicialización del Servidor ---
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // Render usa el puerto 10000 por defecto
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
     console.log('Configura tu webhook de Twilio para que apunte a esta URL + /whatsapp');
