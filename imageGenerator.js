@@ -1,5 +1,3 @@
-// imageGenerator.js - CÓDIGO COMPLETO Y CORREGIDO
-
 const { createCanvas } = require('canvas');
 const { FORMULA_LATEX_TEMPLATES } = require('./config.js');
 
@@ -99,7 +97,6 @@ function wrapText(context, text, maxWidth) {
     return result;
 }
 
-
 /**
  * Genera una imagen de bienvenida con la lista de comandos.
  * @returns {Buffer} Un buffer de la imagen en formato PNG.
@@ -159,5 +156,4 @@ function generateWelcomeImage() {
     return canvas.toBuffer('image/png');
 }
 
-// ÚNICA LÍNEA DE EXPORTACIÓN AL FINAL DEL ARCHIVO
 module.exports = { generateImage, generateWelcomeImage };
