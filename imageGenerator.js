@@ -97,4 +97,44 @@ function wrapText(context, text, maxWidth) {
     return result;
 }
 
-module.exports = { generateImage };
+/**
+ * Genera una imagen de bienvenida con la lista de comandos.
+ * @returns {Buffer} Un buffer de la imagen en formato PNG.
+ */
+function generateWelcomeImage() {
+    const width = 800;
+    const height = 550;
+    const padding = 50;
+    const lineHeight = 40;
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // Fondo con degradado azul
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#1E3A8A'); // Azul oscuro
+    gradient.addColorStop(1, '#3B82F6'); // Azul más claro
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Título principal
+    ctx.fillStyle = '#FFFFFF'; // Texto blanco
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('¡Bienvenido!', width / 2, padding + 60);
+
+    // Subtítulo
+    ctx.font = '24px Arial';
+    ctx.fillText('Soy tu Asistente de Matemática Financiera', width / 2, padding + 120);
+
+    // Lista de comandos
+    ctx.textAlign = 'left';
+    ctx.font = '22px Arial';
+    let currentY = padding + 220;
+    
+    const commands = [
+        { cmd: '!resolver1', desc: '(Recomendado ✨)' },
+        { cmd: '!resolver2', desc: '' },
+        { cmd: '!resolver3', desc: '' },
+        { cmd: '!resolver4', desc: '' },
+        { cmd: '!resolver5', desc: '' },
