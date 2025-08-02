@@ -1,29 +1,63 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fetch = require('node-fetch');
-const { API_KEYS, OPENROUTER_MODELS } = require('./config.js');
+const { API_KEYS, OPENROUTER_MODELS, FORMULA_LATEX_TEMPLATES, VARIABLE_DESCRIPTIONS } = require('./config.js');
+
+// --- Construcción del Prompt del Sistema ---
+const formulaKnowledgeBase = Object.keys(FORMULA_LATEX_TEMPLATES)
+    .map(key => `- ${key}`)
+    .join('\n');
+
+const variableDictionary = Object.entries(VARIABLE_DESCRIPTIONS)
+    .map(([key, value]) => `- ${key}: ${value}`)
+    .join('\n');
+
+const currentYear = new Date().getFullYear();
 
 // --- Prompt del Sistema para la Generación de Planes ---
 const PLAN_GENERATION_SYSTEM_PROMPT = `
 Eres un experto en finanzas que crea planes de cálculo para resolver problemas de matemática financiera.
-Tu respuesta DEBE ser un objeto JSON con la siguiente estructura:
+Tu única función es analizar un problema financiero y generar un plan de cálculo secuencial en estricto formato JSON por que hay un sistema que lo resulve.
+Tu salida DEBE ser única y exclusivamente el objeto JSON. No incluyas absolutamente ningún texto adicional, explicaciones, o formato markdown.
 
+REGLAS CRÍTICAS (NO ROMPER NUNCA):
+- Tu única salida debe ser un objeto JSON válido. Nada de texto antes o después.
+- NO INVENTES FÓRMULAS. Debes usar ÚNICAMENTE los nombres de la \`LISTA DE FÓRMULAS DISPONIBLES\`. Si creas una fórmula que no está en la lista, el plan fallará porque la calculadora especializada no la reconocerá.
+- NO HAGAS CÁLCULOS en \`initial_data\` ni en los \`inputs\`. Usa un paso de cálculo para CADA operación matemática (suma, división, etc.), usando las fórmulas de utilidad.
+- NOMBRES DE VARIABLES: Usa una sola palabra con guiones bajos (ej: \`tasa_mensual\`).
+- REFERENCIAS A VARIABLES: Usa la sintaxis exacta \`{{nombre_variable}}\`. NUNCA uses expresiones como \`{{var1 / var2}}\`.
+- PARÁMETROS DE ENTRADA (inputs): Las claves del objeto 'inputs' DEBEN coincidir con los nombres de las variables que espera la fórmula (ej: P, i, n, i_conocida).
+- MANEJO DE ERRORES: Si el problema no se puede resolver (faltan datos), devuelve este JSON y nada más: \`{"error": "Faltan datos para resolver el problema."}\`
+
+PROCESO A SEGUIR:
+1.  \`interpretation\`: Describe brevemente el plan para resolver el problema.
+2.  \`initial_data\`: Extrae los datos BRUTOS del problema. Usa el \`DICCIONARIO DE VARIABLES\`. Si una fecha no tiene año, asume el año actual (${currentYear}).
+3.  \`calculation_steps\`: Un array de pasos. Cada paso es una operación de la \`LISTA DE FÓRMULAS\`.
+4.  \`final_variable\`: El nombre de la variable final que se pide calcular.
+
+DICCIONARIO DE VARIABLES:
+${variableDictionary}
+
+LISTA DE FÓRMULAS DISPONIBLES:
+${formulaKnowledgeBase}
+
+EJEMPLO DE PLAN VÁLIDO:
+Problema: "Convierta una tasa efectiva de 72.8 días cuyo valor es de 0.0168 en una tasa efectiva de 187 días."
+JSON ESPERADO:
 {
-  "interpretation": "<Breve descripción de cómo interpretaste el problema>",
-  "initial_data": { "<variable_1>": <valor_1>, "<variable_2>": <valor_2> },
+  "interpretation": "Se necesita convertir una tasa efectiva a otra tasa efectiva con un plazo diferente, usando la fórmula de tasas equivalentes.",
+  "initial_data": { "i_conocida": 0.0168, "n_dias_conocido": 72.8, "n_dias_deseado": 187 },
+  "final_variable": "i_equivalente_187_dias",
   "calculation_steps": [
     {
-      "step_name": "<Nombre del paso>",
-      "formula_name": "<nombre_de_la_formula>",
-      "inputs": { "<param_1>": "{{variable_or_value}}", "<param_2>": "{{variable_or_value}}" },
-      "target_variable": "<nombre_de_la_variable_resultado>"
+      "step_name": "Calcular Tasa Efectiva Equivalente para 187 días",
+      "target_variable": "i_equivalente_187_dias",
+      "formula_name": "formula_tasa_equivalente",
+      "inputs": { "i_conocida": "{{i_conocida}}", "n_dias_conocido": "{{n_dias_conocido}}", "n_dias_deseado": "{{n_dias_deseado}}" }
     }
-  ],
-  "final_variable": "<nombre_de_la_variable_final>"
+  ]
 }
 
-- Utiliza ÚNICAMENTE las fórmulas de la lista proporcionada.
-- No inventes fórmulas.
-- No incluyas la respuesta final en el plan.
+RECUERDA: TU ÚNICA SALIDA DEBE SER EL OBJETO JSON CRUDO.
 `;
 
 /**
